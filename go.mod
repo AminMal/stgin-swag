@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/AminMal/slogger v1.0.0
-	github.com/AminMal/stgin v1.0.2
+	github.com/AminMal/stgin v0.7.0
 	github.com/swaggo/swag v1.8.3
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
 )

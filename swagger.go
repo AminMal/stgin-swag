@@ -110,7 +110,7 @@ func Oauth2DefaultClientID(oauth2DefaultClientID string) func(*Config) {
 	}
 }
 
-// WrapHandler wraps `http.Handler` into `gin.HandlerFunc`.
+// WrapHandler wraps `http.Handler` into `stgin.API`.
 func WrapHandler(handler *webdav.Handler, options ...func(*Config)) stgin.API {
 	var config = Config{
 		URL:                      "doc.json",
@@ -131,7 +131,7 @@ func WrapHandler(handler *webdav.Handler, options ...func(*Config)) stgin.API {
 }
 
 
-// costum stgin.ResponseEntity
+// custom stgin.ResponseEntity
 
 type responseEntity struct {
 	contentType 	string
@@ -157,8 +157,27 @@ func (s *sink) Write(p []byte) (n int, err error) {
 
 // ========================
 
+type responseAggregator struct {
+	statusCode 	int
+	entity 		[]byte
+	headers     http.Header
+}
 
-// CustomWrapHandler wraps `http.Handler` into `gin.HandlerFunc`.
+func (r *responseAggregator) Header() http.Header {
+	return r.headers
+}
+
+func (r *responseAggregator) Write(bytes []byte) (int, error) {
+	r.entity = append(r.entity, bytes...)
+	return len(bytes), nil
+}
+
+func (r *responseAggregator) WriteHeader(statusCode int) {
+	r.statusCode = statusCode
+}
+
+
+// CustomWrapHandler wraps `http.Handler` into `stgin.API`.
 func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 	var once sync.Once
 
@@ -232,10 +251,26 @@ func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 				swaggerLogger.Colored(colored.RED).Err(err.Error())
 				return stgin.InternalServerError(stgin.Text("internal server error"))
 			}
-			return stgin.Ok(stgin.Json(&docMap))
+			btes, err := json.Marshal(&docMap)
+			entity := responseEntity{
+				contentType: contentType,
+				bytes:       btes,
+				err:         err,
+			}
+			return stgin.Ok(entity)
+		default:
+			response := responseAggregator{
+				statusCode: 0,
+				entity:     []byte{},
+				headers:    http.Header{},
+			}
+			handler.ServeHTTP(&response, request.Underlying)
+			if response.statusCode <= 0 { response.statusCode = 200 }
+			return stgin.CreateResponse(response.statusCode, responseEntity{
+				contentType: contentType,
+				bytes:       response.entity,
+			})
 		}
-		return stgin.Ok(stgin.Empty())
-
 	}
 }
 
