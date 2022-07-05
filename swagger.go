@@ -204,7 +204,7 @@ func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 			contentType = "application/json; charset=utf-8"
 		}
 
-		aggregator := sink{}
+		aggregator := sink{[]byte{}}
 		switch path {
 		case "index.html":
 			err := index.Execute(&aggregator, config.toSwaggerConfig())
