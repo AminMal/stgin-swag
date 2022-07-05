@@ -10,9 +10,13 @@ import (
 
 	"golang.org/x/net/webdav"
 
+	"github.com/AminMal/slogger"
+	"github.com/AminMal/slogger/colored"
 	"github.com/AminMal/stgin"
 	"github.com/swaggo/swag"
 )
+
+var swaggerLogger = slogger.NewConsoleLogger("swagger")
 
 type swaggerConfig struct {
 	URL                      string
@@ -205,7 +209,7 @@ func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 		case "index.html":
 			err := index.Execute(&aggregator, config.toSwaggerConfig())
 			if err != nil {
-				// todo, make swag logger log this
+				swaggerLogger.Colored(colored.RED).Err(err.Error())
 				return stgin.InternalServerError(stgin.Text("internal server error"))
 			} else {
 				entity := responseEntity{
@@ -218,6 +222,7 @@ func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 		case "doc.json":
 			doc, err := swag.ReadDoc(config.InstanceName)
 			if err != nil {
+				swaggerLogger.Colored(colored.RED).Err(err.Error())
 				return stgin.InternalServerError(stgin.Text("internal server error"))
 			}
 			return stgin.Ok(stgin.Text(doc))
