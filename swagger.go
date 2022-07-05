@@ -1,6 +1,7 @@
 package swag
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"os"
@@ -221,11 +222,17 @@ func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 			}
 		case "doc.json":
 			doc, err := swag.ReadDoc(config.InstanceName)
+			docMap := make(map[string]any)
 			if err != nil {
 				swaggerLogger.Colored(colored.RED).Err(err.Error())
 				return stgin.InternalServerError(stgin.Text("internal server error"))
 			}
-			return stgin.Ok(stgin.Json(doc))
+			err = json.Unmarshal([]byte(doc), &docMap)
+			if err != nil {
+				swaggerLogger.Colored(colored.RED).Err(err.Error())
+				return stgin.InternalServerError(stgin.Text("internal server error"))
+			}
+			return stgin.Ok(stgin.Json(&docMap))
 		}
 		return stgin.Ok(stgin.Empty())
 
