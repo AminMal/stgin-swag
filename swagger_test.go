@@ -168,3 +168,12 @@ func TestPersistAuthorization(t *testing.T) {
 	configFunc(&cfg)
 	assert.Equal(t, false, cfg.PersistAuthorization)
 }
+
+func TestServedOnPrefix(t *testing.T) {
+	server := stgin.NewServer(":9000")
+	ServedOnPrefix("/swagger", server)
+
+	w1 := performRequest(http.MethodGet, "/swagger/index.html", server)
+	assert.Equal(t, http.StatusOK, w1.Code)
+	assert.Equal(t, w1.Header()["Content-Type"][0], "text/html; charset=utf-8")
+}
