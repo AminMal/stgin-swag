@@ -150,7 +150,7 @@ type sink struct {
 }
 
 func (s *sink) Write(p []byte) (n int, err error) {
-	s.bytes = p
+	s.bytes = append(s.bytes, p...)
 	return len(p), nil
 }
 
