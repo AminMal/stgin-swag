@@ -1,4 +1,4 @@
-module github.com/AminMal/stgin/swag
+module github.com/AminMal/stgin-swag
 
 go 1.18
 
