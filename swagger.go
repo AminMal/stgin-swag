@@ -226,9 +226,14 @@ func CustomWrapHandler(config *Config, handler *webdav.Handler) stgin.API {
 				return stgin.InternalServerError(stgin.Text("internal server error"))
 			}
 			return stgin.Ok(stgin.Text(doc))
+		default:
+			doc, err := swag.ReadDoc(config.InstanceName)
+			if err != nil {
+				swaggerLogger.Colored(colored.RED).Err(err.Error())
+				return stgin.InternalServerError(stgin.Text("internal server error"))
+			}
+			return stgin.Ok(stgin.Text(doc))
 		}
-		return stgin.Ok(stgin.Empty())
-
 	}
 }
 
