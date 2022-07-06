@@ -31,7 +31,7 @@ type swaggerConfig struct {
 	Oauth2DefaultClientID    string
 }
 
-// Config stores ginSwagger configuration variables.
+// Config stores stginSwagger configuration variables.
 type Config struct {
 	// The url pointing to API definition (normally swagger.json or swagger.yaml). Default is `doc.json`.
 	URL                      string
